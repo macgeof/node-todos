@@ -40,9 +40,9 @@ MongoClient.connect('mongodb://localhost:27017/TodoApp', {useNewUrlParser : true
     .then((docs) => {
       console.log(JSON.stringify(docs, undefined, 2));
     })
-    .then(() => {
-      client.close();
-    })
+    // .then(() => {
+    //   client.close();
+    // })
     .catch((error) => {
       console.log('Error finding Todos.', error);
     });
