@@ -5,11 +5,6 @@ const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
 const {User} = require('./models/user');
 
-beforeEach((done) => {
-  Todo.remove({})
-    .then(() => done());
-});
-
 const app = express();
 
 app.use(bodyParser.json());
@@ -27,6 +22,19 @@ app.post('/todos', (request, response) => {
       response.status(400);
       response.send(error);
     });
+});
+
+app.get('/todos', (request, response) => {
+  Todo.find()
+    .then((todos) => {
+      response.send({
+        todos
+      });
+    })
+    .catch((err) => {
+      response.status(400);
+      response.send(err);
+    })
 });
 
 app.listen(3000, () => {
