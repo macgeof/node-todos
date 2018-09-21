@@ -10,7 +10,9 @@ const todos = [{
   text: 'First test todo'
 }, {
   _id: new ObjectID(),
-  text: 'Second test todo'
+  text: 'Second test todo',
+  completed:false,
+  completedAt:666
 }];
 
 beforeEach((done) => {
@@ -83,7 +85,7 @@ describe('GET /todos endpoint', () => {
   })
 });
 
-describe('GET /todos:id endpoint', () => {
+describe('GET /todos/:id endpoint', () => {
   it('should get a single todo by id', (done) => {
     request(app)
       .get(`/todos/${todos[0]._id.toHexString()}`)
@@ -110,7 +112,7 @@ describe('GET /todos:id endpoint', () => {
   })
 });
 
-describe('DELETE /todos:id endpoint', () => {
+describe('DELETE /todos/:id endpoint', () => {
   it('should remove a todo', (done) => {
     const id = todos[1]._id.toHexString();
 
@@ -147,5 +149,45 @@ describe('DELETE /todos:id endpoint', () => {
       .delete('/todos/123')
       .expect(404)
       .end(done);
+  });
+});
+
+describe('PATCH /todos/:id endpoint', () => {
+  it('should update the todo', (done) => {
+    const id = todos[0]._id.toHexString();
+    const text = 'This should be the new text';
+    request(app)
+      .patch(`/todos/${id}`)
+      .send({
+        completed:true,
+        text
+      })
+      .expect(200)
+      .expect((response) => {
+        expect(response.body.todo.text).toBe(text);
+        expect(response.body.todo.completed).toBe(true);
+        expect(typeof response.body.todo.completedAt).toBe('number');
+        expect(response.body.todo.completedAt).toBeLessThanOrEqual(new Date().getTime());
+      })
+      .end(done)
+  });
+
+  it('should clear completedAt when todo is not completed', (done) => {
+
+      const id = todos[1]._id.toHexString();
+      const text = 'This should be the new text';
+      request(app)
+        .patch(`/todos/${id}`)
+        .send({
+          completed:false,
+          text
+        })
+        .expect(200)
+        .expect((response) => {
+          expect(response.body.todo.text).toBe(text);
+          expect(response.body.todo.completed).toBe(false);
+          expect(response.body.todo.completedAt).toBeNull();
+        })
+        .end(done)
   });
 });
