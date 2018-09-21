@@ -6,7 +6,11 @@
   "scripts": {
     "test": "mocha server/**/*.test.js",
     "test-watch": "nodemon --exec 'npm test'",
-    "start-dev": "nodemon server/server.js"
+    "start-dev": "nodemon server/server.js",
+    "start": "node server/server.js"
+  },
+  "engines": {
+    "node":"10.10.0"
   },
   "author": "",
   "license": "ISC",
