@@ -109,3 +109,43 @@ describe('GET /todos:id endpoint', () => {
       .end(done);
   })
 });
+
+describe('DELETE /todos:id endpoint', () => {
+  it('should remove a todo', (done) => {
+    const id = todos[1]._id.toHexString();
+
+    request(app)
+      .delete(`/todos/${id}`)
+      .expect(200)
+      .expect((response) => {
+        expect(response.body.todo._id).toBe(id);
+      })
+      .end((err, response) => {
+        if(err) {
+          return done(err);
+        }
+        else {
+          Todo.findById(id)
+            .then((todo) => {
+              expect(todo).toBeFalsy();
+              done();
+            })
+            .catch((err) => done(err));
+        }
+      })
+  });
+
+  it('should return 404 if todo not found', (done) => {
+    const id = new ObjectID().toHexString();
+    request(app)
+      .delete(`/todos/${id}`)
+      .expect(404)
+      .end(done);
+  });
+  it('should return 400 if todo id not valid', (done) => {
+    request(app)
+      .delete('/todos/123')
+      .expect(404)
+      .end(done);
+  });
+});
