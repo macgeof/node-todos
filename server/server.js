@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
@@ -16,26 +17,55 @@ app.post('/todos', (request, response) => {
   });
   todo.save()
     .then((doc) => {
-      response.send(doc);
+      return response.send(doc);
     })
     .catch((error) => {
       response.status(400);
-      response.send(error);
+      return response.send(error);
     });
 });
 
 app.get('/todos', (request, response) => {
   Todo.find()
     .then((todos) => {
-      response.send({
+      return response.send({
         todos
       });
     })
     .catch((err) => {
       response.status(400);
-      response.send(err);
+      return response.send(err);
     })
 });
+
+app.get('/todos/:id', (request, response) => {
+  const id = request.params.id;
+  if (!ObjectID.isValid(id)) {
+    console.log('Invalid Id', id);
+    response.status(404);
+    return response.send();
+  }
+  else
+  {
+    Todo.findById(id)
+      .then((todo) => {
+        if (todo !== null) {
+          console.log('Returning todo with Id', id);
+          return response.send({todo});
+        }
+        else {
+          console.log('No todo found with Id', id);
+          response.status(404);
+          return response.send();
+        }
+      })
+      .catch((err) => {
+        console.log('Unable to complete request');
+        response.status(400);
+        return response.send();
+      })
+  }
+})
 
 app.listen(3000, () => {
   console.log('Started on port 3000');
