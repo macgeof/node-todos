@@ -13,6 +13,24 @@ const app = express();
 
 app.use(bodyParser.json());
 
+app.post('/users', (request, response) => {
+var body = _.pick(request.body, ['email', 'password']);
+  const user = new User(body);
+  user.save()
+    .then(() => {
+      return user.generateAuthToken();
+    })
+    .then((token) => {
+      response.header('x-auth', token)
+      response.send(user);
+    })
+    .catch((err) => {
+      console.log('Unable to save user', err);
+      response.status(400);
+      response.send(err);
+    })
+});
+
 app.post('/todos', (request, response) => {
   console.log(request.body);
   const todo = new Todo({
