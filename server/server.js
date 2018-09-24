@@ -8,6 +8,7 @@ const _ = require('lodash');
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
 const {User} = require('./models/user');
+const {authenticate} = require('./middleware/authenticate');
 
 const app = express();
 
@@ -29,6 +30,10 @@ var body = _.pick(request.body, ['email', 'password']);
       response.status(400);
       response.send(err);
     })
+});
+
+app.get('/users/me',  authenticate, (request, response) => {
+  response.send(request.user);
 });
 
 app.post('/todos', (request, response) => {
