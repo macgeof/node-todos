@@ -53,6 +53,18 @@ app.post('/users/login', (request, response) => {
     })
 });
 
+app.delete('/users/me/token', authenticate, (request, response) => {
+  request.user.removeToken(request.token)
+    .then(() => {
+      response.status(200);
+      response.send()
+    })
+    .catch((err) => {
+      response.status(400);
+      response.send();
+    })
+});
+
 app.post('/todos', (request, response) => {
   // console.log(request.body);
   const todo = new Todo({
