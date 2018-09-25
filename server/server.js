@@ -26,7 +26,7 @@ var body = _.pick(request.body, ['email', 'password']);
       response.send(user);
     })
     .catch((err) => {
-      console.log('Unable to save user', err);
+      // console.log('Unable to save user', err);
       response.status(400);
       response.send(err);
     })
@@ -37,7 +37,7 @@ app.get('/users/me',  authenticate, (request, response) => {
 });
 
 app.post('/todos', (request, response) => {
-  console.log(request.body);
+  // console.log(request.body);
   const todo = new Todo({
     text : request.body.text
   });
