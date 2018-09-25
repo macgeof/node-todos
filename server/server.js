@@ -36,6 +36,23 @@ app.get('/users/me',  authenticate, (request, response) => {
   response.send(request.user);
 });
 
+app.post('/users/login', (request, response) => {
+  var body = _.pick(request.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password)
+    .then((user) => {
+      return  user.generateAuthToken()
+        .then((token) => {
+          response.header('x-auth', token)
+          response.send(user);
+        })
+    })
+    .catch ((err) => {
+      response.status(100);
+      response.send();
+    })
+});
+
 app.post('/todos', (request, response) => {
   // console.log(request.body);
   const todo = new Todo({
