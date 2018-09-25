@@ -48,7 +48,7 @@ app.post('/users/login', (request, response) => {
         })
     })
     .catch ((err) => {
-      response.status(100);
+      response.status(400);
       response.send();
     })
 });
