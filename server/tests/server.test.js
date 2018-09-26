@@ -282,7 +282,7 @@ describe('POST /users', () => {
         User.findOne({email})
           .then((user) => {
             expect(user).toBeTruthy();
-            expect(user.password === password).toBeFalsy();
+            expect(user.password).not.toBe(password);
             done();
           })
           .catch((err) => {
