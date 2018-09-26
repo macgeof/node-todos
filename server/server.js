@@ -10,6 +10,9 @@ const {Todo} = require('./models/todo');
 const {User} = require('./models/user');
 const {authenticate} = require('./middleware/authenticate');
 
+mongoose.set('useCreateIndex', true);
+mongoose.set('useFindAndModify', false);
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -65,10 +68,11 @@ app.delete('/users/me/token', authenticate, (request, response) => {
     })
 });
 
-app.post('/todos', (request, response) => {
+app.post('/todos', authenticate, (request, response) => {
   // console.log(request.body);
   const todo = new Todo({
-    text : request.body.text
+    text : request.body.text,
+    _creator : request.user._id
   });
   todo.save()
     .then((doc) => {
@@ -80,8 +84,10 @@ app.post('/todos', (request, response) => {
     });
 });
 
-app.get('/todos', (request, response) => {
-  Todo.find()
+app.get('/todos', authenticate, (request, response) => {
+  Todo.find({
+    _creator:request.user._id
+  })
     .then((todos) => {
       return response.send({
         todos
@@ -93,23 +99,26 @@ app.get('/todos', (request, response) => {
     })
 });
 
-app.get('/todos/:id', (request, response) => {
+app.get('/todos/:id', authenticate, (request, response) => {
   const id = request.params.id;
   if (!ObjectID.isValid(id)) {
-    console.log('Invalid Id', id);
+    // console.log('Invalid Id', id);
     response.status(404);
     return response.send();
   }
   else
   {
-    Todo.findById(id)
+    Todo.findOne({
+      _id:id,
+      _creator:request.user._id
+    })
       .then((todo) => {
         if (todo !== null) {
-          console.log('Returning todo with Id', id);
+          // console.log('Returning todo with Id', id);
           return response.send({todo});
         }
         else {
-          console.log('No todo found with Id', id);
+          // console.log('No todo found with Id', id);
           response.status(404);
           return response.send();
         }
@@ -122,21 +131,22 @@ app.get('/todos/:id', (request, response) => {
   };
 });
 
-app.delete('/todos/:id', (request, response) => {
+app.delete('/todos/:id', authenticate, (request, response) => {
   const id = request.params.id;
   if(!ObjectID.isValid(id))
   {
-    console.log('Invalid Id', id);
+    // console.log('Invalid Id', id);
     response.status(404);
     return response.send();
   }
   else {
     Todo.findOneAndDelete({
-      _id:id
+      _id:id,
+      _creator:request.user._id
     })
     .then((todo) => {
       if (!todo) {
-        console.log('Todo not found for Id', id);
+        // console.log('Todo not found for Id', id);
         response.status(404);
         return response.send();
       }
@@ -151,11 +161,11 @@ app.delete('/todos/:id', (request, response) => {
   };
 });
 
-app.patch('/todos/:id', (request, response) => {
+app.patch('/todos/:id', authenticate, (request, response) => {
   const id = request.params.id;
   var body = _.pick(request.body, ['text', 'completed']);
   if (!ObjectID.isValid(id)) {
-    console.log('Invalid Id', id);
+    // console.log('Invalid Id', id);
     response.status(404);
     return response.send();
   } else {
@@ -166,7 +176,10 @@ app.patch('/todos/:id', (request, response) => {
       body.completed = false;
       body.completedAt = null;
     }
-    Todo.findByIdAndUpdate(id, {
+    Todo.findOneAndUpdate({
+      _id:id,
+      _creator:request.user._id
+    }, {
       $set : body
     },
     {

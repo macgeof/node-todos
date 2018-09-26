@@ -59,7 +59,7 @@ UserSchema.methods.generateAuthToken = function() {
 UserSchema.methods.removeToken = function (token) {
   const user = this;
 
-  return user.update({
+  return user.updateOne({
     $pull:{
       tokens: {token}
     }
@@ -73,7 +73,7 @@ UserSchema.statics.findByToken = function (token) {
   try {
     decoded = jwt.verify(token, 'abc123');
   } catch (err) {
-    console.log('Token decoding failed', token);
+    // console.log('Token decoding failed', token);
     return Promise.reject();
   }
 

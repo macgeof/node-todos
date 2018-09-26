@@ -13,7 +13,7 @@ const authenticate = (request, response, next) => {
       next();
     })
     .catch((err) => {
-      console.log('Finding user for token has failed');
+      // console.log('Finding user for token has failed');
       response.status(401);
       response.send();
     });
